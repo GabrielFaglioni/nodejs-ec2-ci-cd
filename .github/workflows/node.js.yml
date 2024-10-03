@@ -15,9 +15,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        
+
     # Step to create .env file with the secret PROD_ENV_FILE
     - name: Create .env file
-      run: echo "${{ secrets.PROD_ENV_FILE }}" > .env
+      run: |
+        printf "%s" "${{ secrets.PROD_ENV_FILE }}" > .env
+
+    # Optional step to check if the .env file was created and contains the secret
+    - name: Check .env file contents
+      run: cat .env
 
     - run: npm ci
