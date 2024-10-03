@@ -1,7 +1,7 @@
 name: Node.js CI/CD
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 jobs:
   build:
     runs-on: self-hosted
@@ -9,20 +9,21 @@ jobs:
       matrix:
         node-version: [18.x]
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
 
-    # Step to create .env file with the secret PROD_ENV_FILE
-    - name: Create .env file
-      run: |
-        printf "%s" "${{ secrets.PROD_ENV_FILE }}" > .env
+      # Step to create .env file with the secret PROD_ENV_FILE
+      - name: Create .env file
+        run: |
+          touch .env
+          echo "${{ secrets.ENV }}" > .env
 
-    # Optional step to check if the .env file was created and contains the secret
-    - name: Check .env file contents
-      run: cat .env
+      # Optional step to check if the .env file was created and contains the secret
+      - name: Check .env file contents
+        run: cat .env
 
-    - run: npm ci
+      - run: npm ci
