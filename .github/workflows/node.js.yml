@@ -5,9 +5,9 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    strategy:
-      matrix:
-        node-version: [18.x]
+    env:
+      WORK_DIR: ${{ github.workspace }}
+      PERSIST_DIR: /home/ubuntu/persisted
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -16,40 +16,22 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - name: Debug PROD_ENV_FILE secret
+    - name: Create, verify, and persist .env file
       run: |
-        echo "PROD_ENV_FILE content:"
-        echo "${{ secrets.PROD_ENV_FILE }}"
-        echo "PROD_ENV_FILE length: ${#PROD_ENV_FILE}"
-      env:
-        PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
-    - name: Create and verify .env file
+        echo "${{ secrets.PROD_ENV_FILE }}" > $WORK_DIR/.env
+        echo "Work directory .env file hash:"
+        md5sum $WORK_DIR/.env
+        mkdir -p $PERSIST_DIR
+        cp $WORK_DIR/.env $PERSIST_DIR/.env
+        echo "Persisted .env file hash:"
+        md5sum $PERSIST_DIR/.env
+        echo "File permissions:"
+        ls -l $WORK_DIR/.env $PERSIST_DIR/.env
+        echo "File sizes:"
+        wc -c $WORK_DIR/.env $PERSIST_DIR/.env
+    - name: Verify persistence after job
       run: |
-        echo "${{ secrets.PROD_ENV_FILE }}" > .env
-        echo ".env file contents:"
-        cat .env
-        echo ".env file size:"
-        wc -c < .env
-        echo "Current working directory:"
-        pwd
-        echo "Directory contents:"
-        ls -la
-    - name: Persist .env file
-      run: |
-        mkdir -p $HOME/persisted
-        cp .env $HOME/persisted/.env
-        echo "Persisted .env file location: $HOME/persisted/.env"
-        echo "Persisted .env file contents:"
-        cat $HOME/persisted/.env
-    - name: Check file permissions
-      run: |
-        echo ".env file permissions:"
-        ls -l .env
-        echo "Persisted .env file permissions:"
-        ls -l $HOME/persisted/.env
-    - name: Verify persistence
-      run: |
-        echo "Current directory .env contents:"
-        cat .env
-        echo "Persisted .env contents:"
-        cat $HOME/persisted/.env
+        echo "Work directory .env file hash after job:"
+        md5sum $WORK_DIR/.env || echo "Work directory .env not found"
+        echo "Persisted .env file hash after job:"
+        md5sum $PERSIST_DIR/.env || echo "Persisted .env not found"
