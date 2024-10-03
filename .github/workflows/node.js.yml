@@ -31,5 +31,8 @@ jobs:
       - name: Installing Packages
         run: npm ci
 
+      - name: Installing pm2
+        run: npm i pm2
+
       - name: Restarting the Server
         run: pm2 restart BackendAPI
