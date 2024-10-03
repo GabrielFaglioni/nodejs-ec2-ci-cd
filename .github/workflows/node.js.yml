@@ -30,3 +30,26 @@ jobs:
         cat .env
         echo ".env file size:"
         wc -c < .env
+        echo "Current working directory:"
+        pwd
+        echo "Directory contents:"
+        ls -la
+    - name: Persist .env file
+      run: |
+        mkdir -p $HOME/persisted
+        cp .env $HOME/persisted/.env
+        echo "Persisted .env file location: $HOME/persisted/.env"
+        echo "Persisted .env file contents:"
+        cat $HOME/persisted/.env
+    - name: Check file permissions
+      run: |
+        echo ".env file permissions:"
+        ls -l .env
+        echo "Persisted .env file permissions:"
+        ls -l $HOME/persisted/.env
+    - name: Verify persistence
+      run: |
+        echo "Current directory .env contents:"
+        cat .env
+        echo "Persisted .env contents:"
+        cat $HOME/persisted/.env
