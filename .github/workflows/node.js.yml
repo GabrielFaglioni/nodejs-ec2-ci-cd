@@ -16,28 +16,17 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - name: Check if secrets are empty and create .env file
+    - name: Debug PROD_ENV_FILE secret
       run: |
-        if [ -z "${{ secrets.PROD_ENV_FILE }}" ]; then
-          echo "Error: PROD_ENV_FILE secret is empty"
-          exit 1
-        else
-          echo "PROD_ENV_FILE secret is not empty"
-          echo "Creating .env file..."
-          touch .env
-          echo "${{ secrets.PROD_ENV_FILE }}" > .env
-          echo ".env file created. File size:"
-          wc -c < .env
-        fi
-    - name: Verify .env file (without exposing content)
+        echo "PROD_ENV_FILE content:"
+        echo "${{ secrets.PROD_ENV_FILE }}"
+        echo "PROD_ENV_FILE length: ${#PROD_ENV_FILE}"
+      env:
+        PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+    - name: Create and verify .env file
       run: |
-        if [ -s .env ]; then
-          echo ".env file exists and is not empty"
-          echo "Number of lines in .env:"
-          wc -l < .env
-          echo "First line of .env (sanitized):"
-          sed 's/=.*/=REDACTED/' .env | head -n 1
-        else
-          echo "Error: .env file is empty or not created"
-          exit 1
-        fi
+        echo "${{ secrets.PROD_ENV_FILE }}" > .env
+        echo ".env file contents:"
+        cat .env
+        echo ".env file size:"
+        wc -c < .env
