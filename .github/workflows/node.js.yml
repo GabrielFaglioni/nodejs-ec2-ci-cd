@@ -26,4 +26,15 @@ jobs:
     - run: |
         touch .env
         echo "${{ secrets.PROD_ENV_FILE }}" > .env
+        echo "Checking .env file:"
+        if [ -s .env ]; then
+          echo "  - .env file exists and is not empty"
+          echo "  - File size (in bytes): $(wc -c < .env)"
+          echo "  - Number of lines: $(wc -l < .env)"
+          echo "  - First line (sanitized):"
+          sed 's/=.*/=REDACTED/' .env | head -n 1
+        else
+          echo "  - .env file is empty or not created"
+          exit 1
+        fi
         
