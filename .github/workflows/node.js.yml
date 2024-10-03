@@ -28,4 +28,8 @@ jobs:
       - name: Check .env file contents
         run: cat .env
 
-      - run: npm ci
+      - name: Installing Packages
+        run: npm ci
+
+      - name: Restarting the Server
+        run: pm2 restart BackendAPI

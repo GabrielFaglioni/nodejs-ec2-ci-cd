@@ -7,7 +7,6 @@ const connectDB = require("./config/db");
 const userRoutes = require("./routes/users");
 const errorHandler = require("./middlewares/error");
 
-
 // Connect to DB
 connectDB();
 
@@ -21,12 +20,16 @@ app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/products", (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "hello world"
+  });
+});
 
 app.use(errorHandler);
 
-const server = app.listen(port, () =>
-  console.log(`Server started listening on ${port}`)
-);
+const server = app.listen(port, () => console.log(`Server started listening on ${port}`));
 
 process.on("unhandledRejection", (error, promise) => {
   console.log(`Logged Error: ${error}`);
